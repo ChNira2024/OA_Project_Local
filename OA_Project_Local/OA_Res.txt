@@ -1,0 +1,379 @@
+====================OA_RESERVE_FUND_DETA table creation and data insertion ====================================
+create table OA_RESERVE_FUND_DETAILS(RESERVE_FUND_ID NUMBER(30) PRIMARY KEY,
+		ACCOUNT_NUMBER VARCHAR2(20),CIF_NUMBER VARCHAR2(20),MGMNT_COMP_ID NUMBER(20),
+		BUILDING_ID NUMBER(20),RESERVE_ACCOUNT_NUMBER VARCHAR2(20),IS_ACTIVE VARCHAR2(1));
+select *from OA_RESERVE_FUND_DETAILS;
+create sequence RESERVE_FUND_ID start with 1 increment by 1 maxvalue 1000 minvalue 1 cycle;
+
+INSERT INTO OA_RESERVE_FUND_DETAILS VALUES(RESERVE_FUND_ID.NEXTVAL,'19000067249','13491700',201,101,'19000067253','Y');
+INSERT INTO OA_RESERVE_FUND_DETAILS VALUES(RESERVE_FUND_ID.NEXTVAL,'19000067593','12926328',202,102,'19000067595','Y');
+INSERT INTO OA_RESERVE_FUND_DETAILS VALUES(RESERVE_FUND_ID.NEXTVAL,'19000068394','12926328',202,103,'19000068395','Y');
+INSERT INTO OA_RESERVE_FUND_DETAILS VALUES(RESERVE_FUND_ID.NEXTVAL,'19000068549','13729694',203,104,'19000068550','Y');
+INSERT INTO OA_RESERVE_FUND_DETAILS VALUES(RESERVE_FUND_ID.NEXTVAL,'19000068551','13729694',203,105,'19000068552','Y');
+INSERT INTO OA_RESERVE_FUND_DETAILS VALUES(RESERVE_FUND_ID.NEXTVAL,'1950000029','13395951',204,106,'19500000300','Y');
+INSERT INTO OA_RESERVE_FUND_DETAILS VALUES(RESERVE_FUND_ID.NEXTVAL,'19000069777','10676553',205,107,'19000069778','Y');
+COMMIT;
+
+String resQuery = select res.reserve_fund_id, res.account_number, res.cif_number, mngt.MC_NAME_EN, bdg.building_name, res.reserve_account_number, res.is_active
+from OA_RESERVE_FUND_DETAILS res, OA_MANAGEMENT_COMPANIES mngt, OA_BUILDINGS bdg
+where res.building_id=bdg.building_id
+AND res.mgmnt_comp_id=mngt.mgmt_comp_id
+AND res.mgmnt_comp_id = <selected mc id>
+
+if(<selected building value != null>){
+    resQuery = resQuery + " AND res.building_id = "+ <selected building id>;
+}
+resQuery = resQuery +";";
+
+====================OA_MANAGEMENT_COMPANIES table creation and data insertion ====================================
+CREATE TABLE "OA_MANAGEMENT_COMPANIES" 
+   (	"MGMT_COMP_ID" NUMBER(30,0), 
+	"MOLLAK_MC_ID" NUMBER(30,0), 
+	"MC_NAME_EN" VARCHAR2(250 BYTE), 
+	"MC_NAME_AR" VARCHAR2(250 BYTE), 
+	"CONTACT_NUMBER" VARCHAR2(30 BYTE), 
+	"EMAIL" VARCHAR2(200 BYTE), 
+	"TRN" VARCHAR2(200 BYTE), 
+	"ADDRESS" VARCHAR2(2000 BYTE), 
+	"MERCHANT_CODE" VARCHAR2(200 BYTE), 
+	"DATA_ID" NUMBER(30,0), 
+	"SERVICE_ID" NUMBER
+   ) ;
+Insert into OA_MANAGEMENT_COMPANIES (MGMT_COMP_ID,MOLLAK_MC_ID,MC_NAME_EN,MC_NAME_AR,CONTACT_NUMBER,EMAIL,TRN,ADDRESS,MERCHANT_CODE,DATA_ID,SERVICE_ID) values (201,12668916,'RDK OWNERS ASSOCIATION MANAGEMENT LLC','???? ????? ????????','041111222','email@domain.com','14340598349083','Dubai','MR019593',null,290);
+Insert into OA_MANAGEMENT_COMPANIES (MGMT_COMP_ID,MOLLAK_MC_ID,MC_NAME_EN,MC_NAME_AR,CONTACT_NUMBER,EMAIL,TRN,ADDRESS,MERCHANT_CODE,DATA_ID,SERVICE_ID) values (202,12668815,'KAIZEN OWNER ASSOCIATION MANAGEMENT','???? ????? ????????','041111222','email@domain.com','14340598349083','Dubai','MR019593',null,290);
+Insert into OA_MANAGEMENT_COMPANIES (MGMT_COMP_ID,MOLLAK_MC_ID,MC_NAME_EN,MC_NAME_AR,CONTACT_NUMBER,EMAIL,TRN,ADDRESS,MERCHANT_CODE,DATA_ID,SERVICE_ID) values (203,12668714,'Better Communities Owner Association','???? ????? ????????','041111222','email@domain.com','14340598349083','Dubai','MR019593',null,290);
+Insert into OA_MANAGEMENT_COMPANIES (MGMT_COMP_ID,MOLLAK_MC_ID,MC_NAME_EN,MC_NAME_AR,CONTACT_NUMBER,EMAIL,TRN,ADDRESS,MERCHANT_CODE,DATA_ID,SERVICE_ID) values (204,12668613,'STRATUM OWNERS ASSOCIATION MANAGEMENT SERVICES LLC','???? ????? ????????','041111222','email@domain.com','14340598349083','Dubai','MR019593',null,290);
+Insert into OA_MANAGEMENT_COMPANIES (MGMT_COMP_ID,MOLLAK_MC_ID,MC_NAME_EN,MC_NAME_AR,CONTACT_NUMBER,EMAIL,TRN,ADDRESS,MERCHANT_CODE,DATA_ID,SERVICE_ID) values (221,12668919,'SG Community Management Services LLC','???? ????? ????????','041111255','email@domain.com','14340598349086','Dubai','MR019596',null,320);
+
+====================OA_BUILDINGS table creation and data insertion====================================
+CREATE TABLE "OA_BUILDINGS" ("BUILDING_ID" NUMBER, "BUILDING_NAME" VARCHAR2(100), "IS_ACTIVE" VARCHAR2(20))
+
+Insert into OA_BUILDINGS (BUILDING_ID,BUILDING_NAME,IS_ACTIVE) values (101,'TWO TOWERS','Y');
+Insert into OA_BUILDINGS (BUILDING_ID,BUILDING_NAME,IS_ACTIVE) values (102,'BINGHATTI GATEWAY','Y');
+Insert into OA_BUILDINGS (BUILDING_ID,BUILDING_NAME,IS_ACTIVE) values (103,'MILLENNIUM BINGHATTI RESIDENCES BUSINESS BAY','Y');
+Insert into OA_BUILDINGS (BUILDING_ID,BUILDING_NAME,IS_ACTIVE) values (104,'MILANO GIOVANNI BOUTIQUE SUITES','Y');
+Insert into OA_BUILDINGS (BUILDING_ID,BUILDING_NAME,IS_ACTIVE) values (105,'GIOVANNI BOUTIQUE SUITES','Y');
+Insert into OA_BUILDINGS (BUILDING_ID,BUILDING_NAME,IS_ACTIVE) values (106,'PALM VIEW','Y');
+Insert into OA_BUILDINGS (BUILDING_ID,BUILDING_NAME,IS_ACTIVE) values (107,'W Residences - The Palm','Y');
+
+======================================OA_PAYMENT_REQUESTS table creation===============================================================================
+CREATE TABLE "HR"."OA_PAYMENT_REQUESTS" 
+   (	"PYMT_REQ_ID" NUMBER(*,0) NOT NULL ENABLE, 
+	"MATRIX_REF_NO" NUMBER NOT NULL ENABLE, 
+	"SUB_PRODUCT" VARCHAR2(250 BYTE), 
+	"DEBIT_ACCOUNT_NUMBER_DESC" VARCHAR2(250 BYTE), 
+	"BENEFICIARY_NAME" VARCHAR2(250 BYTE), 
+	"INITIATOR_DATE" DATE, 
+	"PAYMENT_CURRENCY" VARCHAR2(50 BYTE), 
+	"INVOICE_AMOUNT" FLOAT(126), 
+	"CUSTOMER_REFERENCE" VARCHAR2(250 BYTE), 
+	"INITIATOR_NAME_DATE_TIME" VARCHAR2(50 BYTE), 
+	"STATUS" VARCHAR2(50 BYTE), 
+	"UPLOADED_ON" DATE, 
+	"UPLOADED_BY" VARCHAR2(50 BYTE), 
+	"PAYMENT_TYPE" VARCHAR2(50 BYTE), 
+	"ATTACHMENT_DATA_ID" NUMBER(*,0), 
+	"DEBIT_ACCOUNT_NO" VARCHAR2(50 BYTE), 
+	"REMARKS" VARCHAR2(250 BYTE), 
+	"MATRIX_FILE_REF_NO" NUMBER, 
+	"ISMAILSENT" VARCHAR2(50 BYTE), 
+	"SUPPLIER_ID" NUMBER(*,0), 
+	"BUDGET_YEAR" NUMBER(*,0), 
+	"SERVICE_CODE" VARCHAR2(100 BYTE), 
+	"MGMT_COMP_ID" NUMBER(*,0), 
+	"BUILDING_ID" NUMBER(*,0), 
+	"BIFURCATION" VARCHAR2(250 BYTE));
+	
+=================================OA_PROPERTY_GROUPS table creation=============================
+create table OA_PROPERTY_GROUPS(PROP_ID NUMBER(30) PRIMARY KEY,PROPERTY_GROUP_ID NUMBER(30),PROPERTY_GROUP_NAME_EN VARCHAR2(20),PROPERTY_GROUP_NAME_AR VARCHAR2(20),
+	MASTER_COMMUNITY_NAME_EN VARCHAR2(20),MASTER_COMMUNITY_NAME_AR VARCHAR2(20),PROJECT_NAME_EN VARCHAR2(20),
+	PROJECT_NAME_AR VARCHAR2(20),STATUS VARCHAR2(10),MERCHANT_CODE NUMBER(10),DATA_ID NUMBER(10),SERVICE_ID NUMBER(10),MGMT_COMP_ID NUMBER(20));
+	
+	create sequence PROP_ID start with 1 increment by 1 maxvalue 1000 minvalue 1 cycle;
+	
+	insert into OA_PROPERTY_GROUPS values(PROP_ID.NEXTVAL,101,'Apartment','شقة','Community A','المجت','Project X', 'المشرو','Active',12345,987,789,456);
+    insert into OA_PROPERTY_GROUPS values(PROP_ID.NEXTVAL,102,'House','شقة','Community B','المجت','Project Y', 'المشرو','Active',16262,567,756,456);
+	
+=================================OA_BUILDING_PROPGROUP_MAPPING table creation=============================
+create table OA_BUILDING_PROPGROUP_MAPPING(PROP_ID NUMBER(30) PRIMARY KEY,PROPERTY_GROUP_ID NUMBER(30),PROPERTY_GROUP_NAME_EN VARCHAR2(20),
+PROPERTY_GROUP_NAME_AR VARCHAR2(20),MASTER_COMMUNITY_NAME_EN VARCHAR2(20),MASTER_COMMUNITY_NAME_AR VARCHAR2(20),PROJECT_NAME_EN VARCHAR2(20),
+PROJECT_NAME_AR VARCHAR2(20),STATUS VARCHAR2(10),MERCHANT_CODE NUMBER(10),DATA_ID NUMBER(10),SERVICE_ID NUMBER(10),MGMT_COMP_ID NUMBER(20),
+BUILDING_ID NUMBER(20),IS_ACTIVE VARCHAR2(10));
+
+insert into OA_BUILDING_PROPGROUP_MAPPING values(8,101,'Apartment','شقة','Community A','المجت','Project X', 'المشرو','Active',12345,987,789,456,345,'Y');
+insert into OA_BUILDING_PROPGROUP_MAPPING values(9,101,'Apartment','شقة','Community A','المجت','Project X', 'المشرو','Active',12345,987,789,789,678,'Y');
+
+***add new column in db:-
+ALTER TABLE table_name ADD column_name datatype;
+
+***delete a column from db:-
+ALTER TABLE table_name DROP COLUMN column_name;
+
+***To change the data type of a column in a table:-
+ALTER TABLE table_name ALTER COLUMN column_name datatype;
+
+***Change old column name to new column name:-
+ALTER TABLE TableName RENAME COLUMN OldColumnName To NewColumnName;
+
+minlength="9" pattern="[0][0-9]{9}" 
+minlength="12" pattern="[0][0-9]{9}"
+
+insert into OA_RESERVE_FUND_DETAILS(RESERVE_FUND_ID,ACCOUNT_NUMBER,CIF_NUMBER,MGMNT_COMP_ID,BUILDING_ID,RESERVE_ACCOUNT_NUMBER,IS_ACTIVE,BRANCH_CODE,RESERVE_FUND_PERCENTAGE,LAST_CALCULATED_ON)VALUES(RESERVE_FUND_ID.NEXTVAL,'019000048430','013117404',201,102,'019000048431','Y','073','10','2022-MAY-05');
+
+alter table OA_RESERVE_FUND_DETAILS add RESERVE_FUND_PERCENTAGE VARCHAR2(20);
+
+alter table OA_RESERVE_FUND_DETAILS add LAST_ADDED_ON DATE;
+
+ALTER TABLE OA_RESERVE_FUND_DETAILS RENAME COLUMN LAST_ADDED_ON TO LAST_CALCULATED_ON;
+insert into OA_RESERVE_FUND_DETAILS (LAST_CALCULATED_ON) values('28-04-2022') where RESERVE_FUND_ID=231;
+
+update OA_RESERVE_FUND_DETAILS set LAST_CALCULATED_ON='22-APR-22' where RESERVE_FUND_ID=231;
+
+22-APR-22
+commit;
+
+insert into OA_RESERVE_FUND_DETAILS(RESERVE_FUND_ID,ACCOUNT_NUMBER,CIF_NUMBER,MGMNT_COMP_ID,BUILDING_ID,RESERVE_ACCOUNT_NUMBER,IS_ACTIVE,BRANCH_CODE,RESERVE_FUND_PERCENTAGE,LAST_CALCULATED_ON)VALUES(RESERVE_FUND_ID.NEXTVAL,'019000048430','013117404',335,822,'019000048431','Y','073','10','22-MAY-05');
+
+INSERT INTO OA_RESERVE_FUND_DETAILS(RESERVE_FUND_ID,ACCOUNT_NUMBER,CIF_NUMBER,RESERVE_ACCOUNT_NUMBER,BRANCH_CODE,MGMNT_COMP_ID,BUILDING_ID)VALUES(RESERVE_FUND_ID.NEXTVAL,'019000048430','013117404','019000048431','073',336,836);
+
+
+
+if we want To call, stored procedure from java application then we should go for Callable
+Q)What is stored procedure ?
+it is group of sql queries which is complete the one perticular task..(adding employing )
+=>stored procedure support 3 parameter like IN(to provide the input vaue), OUT(to collect out put values),
+INOUT(Same person has to provide input and also collect output values.Example: x:=x+x;)
+
+Q) Callable statement ?
+Ans: user to invoke stored procedure from java application..
+
+
+Q) Context area ?
+Ans: it is a memory where results of sql querys are stored.
+Q) what is the use of Sys-REFCUSOR ?
+Ans: it is the implicit cursor. when we execute Select Query, result set object is created and we can get the data from that resultet object.
+=>Sys-REFCURSOR holds the result of the select query.
+==================================================================
+create or replace procedure addProce(num1 IN number, num2 IN number, num3 OUT number) as
+BEGIN
+   num3 := num1+num2;
+END;
+/
+
+create or replace procedure insertProcedure(SNO IN number, SNAME IN varchar2, SADDRS IN varchar2, SSAL IN float) as
+BEGIN
+   insert into STUDENTS(SNO,SNAME,SADDRS,SSAL) values(1,'RAJESH','HYD',20000);
+END;
+/
+
+create or replace procedure selectProcedure(no IN number, name OUT varchar2, addrs OUT varchar2, sal OUT number) as
+BEGIN
+   select sname,saddrs,ssal into name,addrs,sal from STUDENTS where sno=no;
+END;
+/
+
+create or replace procedure updateProcedure(no IN number, name OUT varchar2, addrs OUT varchar2, sal OUT number) as
+BEGIN
+   update STUDENTS set SNAME='Shivaya' WHERE SNO=no;
+END;
+/
+
+create or replace procedure deleteProcedure(no IN number) as
+BEGIN
+   delete from STUDENTS where SNO=sno;
+END;
+/
+
+
+
+
+178746542
+
+
+=====================================================================================
+CREATE TABLE OA_BUDGET_ITEMS (
+    budget_item_id NUMBER(10) PRIMARY KEY,
+    service_code VARCHAR2(50),
+    service_name_en VARCHAR2(100),
+    total_cost NUMBER(15, 2),
+    vat_amount NUMBER(15, 2),
+    total_budget NUMBER(15, 2),
+    consumed_amount NUMBER(15, 2),
+    balance_amount NUMBER(15, 2),
+    is_edit_mode CHAR(1),
+    usage_en VARCHAR2(255),
+    budget_period_code VARCHAR2(20)
+);
+
+INSERT INTO OA_BUDGET_ITEMS (
+    budget_item_id,
+    service_code,
+    service_name_en,
+    total_cost,
+    vat_amount,
+    total_budget,
+    consumed_amount,
+    balance_amount,
+    is_edit_mode,
+    usage_en,
+    budget_period_code
+) VALUES (
+    1,
+    'ABC123',
+    'Service 1',
+    1000.00,
+    50.00,
+    1050.00,
+    800.00,
+    250.00,
+    'Y',
+    'Usage Description 1',
+    '2023-Q1'
+);
+
+INSERT INTO OA_BUDGET_ITEMS (
+    budget_item_id,
+    service_code,
+    service_name_en,
+    total_cost,
+    vat_amount,
+    total_budget,
+    consumed_amount,
+    balance_amount,
+    is_edit_mode,
+    usage_en,
+    budget_period_code
+) VALUES (
+    2,
+    'XYZ456',
+    'Service 2',
+    1500.00,
+    75.00,
+    1575.00,
+    1200.00,
+    375.00,
+    'N',
+    'Usage Description 2',
+    '2023-Q2'
+);
+
+SELECT *FROM OA_BUDGET_ITEMS;
+
+create sequence OA_BUDGET_ITEMS start with 1 increment by 1 maxvalue 1000 minvalue 1 cycle;
+
+
+select serviceCode,serviceNameEn,totalCost,vatAmount,totalBudget,consumedAmount,balanceAmount from oa_budget_items where budgetItemId=1;
+
+create sequence OA_BUDGET_ITEMS start with 1 increment by 1 maxvalue 1000 minvalue 1 cycle;
+
+SELECT * FROM ALL_SEQUENCES WHERE SEQUENCE_NAME = 'OA_BUDGET_ITEMS';
+DROP SEQUENCE OA_BUDGET_ITEMS;
+COMMIT;
+create sequence BUDGET_ITEMS start with 1 increment by 1 maxvalue 1000 minvalue 1 cycle;
+
+insert into OA_BUDGET_ITEMS(budget_item_id,service_code,service_name_en,total_cost,vat_amount,total_budget,consumed_amount,balance_amount,is_edit_mode)VALUES(BUDGET_ITEMS.NEXTVAL,'VBH181','service abs',1010.00,2828.99,27272.00,3636.00,92929.00,'Y');
+
+insert into HR.OA_BUDGET_ITEMS VALUES(BUDGET_ITEMS.NEXTVAL,'VBH181','service abs',1010.00,2828.99,27272.00,3636.00,92929.00,'Y');
+
+
+create table OA_AUDIT_TRAIL(FIELDNAME NVARCHAR2(50) not null,ID INT not null,UPDATEDON datetime null,OLDVALUE NVARCHAR2(50) null,
+NEWVALUE NVARCHAR2(50) null,UPDATEDBY NVARCHAR2(50) null,PYMT_REQ_ID NVARCHAR2(50) null);
+
+
+CREATE TABLE OA_AUDIT_TRAIL (
+    FIELDNAME NVARCHAR2(50) NOT NULL,
+    ID INT NOT NULL,
+    UPDATEDON TIMESTAMP NULL,
+    OLDVALUE NVARCHAR2(50) NULL,
+    NEWVALUE NVARCHAR2(50) NULL,
+    UPDATEDBY NVARCHAR2(50) NULL,
+    PYMT_REQ_ID NVARCHAR2(50) NULL
+);
+INSERT INTO OA_AUDIT_TRAIL (FIELDNAME, ID, UPDATEDON, OLDVALUE, NEWVALUE, UPDATEDBY, PYMT_REQ_ID)
+VALUES ('Field1', 1, TO_TIMESTAMP('2023-12-15 10:30:00', 'YYYY-MM-DD HH24:MI:SS'), 'OldValue1', 'NewValue1', 'User1', 'PmtReqID1');
+
+INSERT INTO OA_AUDIT_TRAIL (FIELDNAME, ID, UPDATEDON, OLDVALUE, NEWVALUE, UPDATEDBY, PYMT_REQ_ID)
+VALUES ('Field2', 2, TO_TIMESTAMP('2023-12-15 11:45:00', 'YYYY-MM-DD HH24:MI:SS'), 'OldValue2', 'NewValue2', 'User2', 'PmtReqID2');
+
+CREATE TABLE OA_AUDIT_TRAIL_LOG (
+    ID INT NOT NULL,
+    PYMT_REQ_ID NVARCHAR2(50) NULL,
+    SERVICE_CODE NVARCHAR2(50) NULL,
+    REVERSAL_AMOUNT NVARCHAR2(50) NULL,
+    UPDATEDBY NVARCHAR2(50) NULL,
+    UPDATEDON TIMESTAMP NULL,
+    "COMMENT" NVARCHAR2(50) NULL
+);
+SELECT ID as budgetItemId,PYMT_REQ_ID,SERVICE_CODE,REVERSAL_AMOUNT,UPDATEDBY,UPDATEDON,
+"COMMENT" FROM OA_AUDIT_TRAIL_LOG WHERE SERVICE_CODE = 'SVC005' AND UPDATEDBY = 'John Doe' 
+AND UPDATEDON BETWEEN TO_DATE('01-01-23','dd-MM-yy') AND TO_DATE('13-01-23','dd-MM-yy');
+
+The condition UPDATEDON >= TO_DATE('01-01-23', 'dd-MM-yy') ensures that records with a date equal to or after '01-01-23' are included.
+The >= operator ensures that the records with a date equal to or after '01-01-23' are included.
+The condition UPDATEDON < TO_DATE('02-01-23', 'dd-MM-yy') ensures that records with a date less than '02-01-23' are included.
+The < operator ensures that records with a date greater than or equal to '01-01-23' but less than '02-01-23' are included. This way, records from the entire day are covered.
+==================================================================
+public BudgetDetailsOutput updateBudgetItems(Reversal reversal) 
+	{
+		logger.info("inside com.mashreq.oa.service.BudgetItemsDetailsUpdateServiceImpl class having updateBudgetItems()");
+		
+		BudgetDetailsOutput budgetItemData = null;
+
+		logger.info("BudgetItemsDetailsUpdateServiceImpl class updateBudgetItems()-Reversal Data: " + reversal);
+
+		
+		// Fetch all records from OA_AUDIT_TRAIL based on payment ID
+		List<AuditTrail> auditTrailRecords = dao.getAuditTrailRecords(reversal);
+		logger.info("fetched auditTrailRecords: " + auditTrailRecords);
+
+		// Iterate over audit trail records
+		for (AuditTrail auditTrailRecord : auditTrailRecords) 
+		{
+			// Subtract new value from old value to get ConsumedAmount
+			Double consumedAmount = Double.parseDouble(auditTrailRecord.getNewValue()) - Double.parseDouble(auditTrailRecord.getOldValue());
+			logger.info("Consumed Amount:" + consumedAmount);
+			logger.info("invoice amount : " + reversal.getInvoiceAmount());
+
+			/*
+			  if(consumedAmount.equals(reversal.getInvoiceAmount())) 
+			   {
+			    logger.info(">>>>>>>>>Equal"); 
+			  } 
+			  else 
+			  { logger.info("Not Equal"); 
+			  }
+			  
+			 */
+
+			// Fetch BudgetItem based on budgetItemId
+			budgetItemData = dao.getBudgetItemById(auditTrailRecord.getId());
+			
+			// Add validation
+			if (consumedAmount.equals(reversal.getInvoiceAmount())) 
+			{
+
+				logger.info("fetched data from oa_budget_items table by using budgetItemId: " + budgetItemData);
+
+				// Update BudgetItem based on your logic
+				if (budgetItemData != null) 
+				{
+					Double updatedConsumerAmount = budgetItemData.getConsumedAmount() - consumedAmount;
+					Double updatedBalanceAmount = budgetItemData.getBalanceAmount() + consumedAmount;
+
+					budgetItemData.setConsumedAmount(updatedConsumerAmount);
+					budgetItemData.setBalanceAmount(updatedBalanceAmount);
+
+					// Save the updated BudgetItem
+					dao.updateBudgetItemTable(budgetItemData);
+
+					// insert Log into OA_AUDIT_TRAIL_LOG
+					// dao.logAuditTrail(budgetItemData, auditTrailRecord, "Reversal Action Done");
+				}
+			}
+			// insert Log into OA_AUDIT_TRAIL_LOG
+			dao.logAuditTrail(budgetItemData, auditTrailRecord, "Reversal Action Done");
+		}
+	
+	
+		return budgetItemData;
+	}
