@@ -33,7 +33,7 @@ public class BudgetDetailsUpdateDaoImpl implements BudgetDetailsUpdateDao {
 		// Implement logic to fetch audit trail records based on payment ID using
 		// jdbcTemplate
 		List<AuditTrail> auditTrailFetchedData = null;
-		String FETCH_QUERY = "select FIELDNAME,ID,OLDVALUE,NEWVALUE,UPDATEDON,UPDATEDBY,PYMT_REQ_ID from OA_AUDIT_TRAIL where PYMT_REQ_ID=?";
+		String FETCH_QUERY = "select FIELDNAME,ID,OLDVALUE,NEWVALUE,UPDATEDON,UPDATEDBY,SERVICECODE,PYMT_REQ_ID from OA_AUDIT_TRAIL where PYMT_REQ_ID=?";
 		Object[] args = { reversal.getPaymentId() };
 		try {
 			logger.info("inside com.mashreq.oa.dao.BudgetDetailsUpdateDaoImpl class having getAuditTrailRecords()");
@@ -64,14 +64,14 @@ public class BudgetDetailsUpdateDaoImpl implements BudgetDetailsUpdateDao {
 	}
 
 	@Override
-	public BudgetDetailsOutput getBudgetItemById(int budgetItemId) {
+	public List<BudgetDetailsOutput> getBudgetItemById(int budgetItemId) {
 		logger.info("inside com.mashreq.oa.dao:BudgetDetailsUpdateDaoImpl class having getBudgetItemById() method");
 		// Implement logic to fetch BudgetItem based on budgetItemId using jdbcTemplate
-		BudgetDetailsOutput budgetItemData = null;
+		List<BudgetDetailsOutput> budgetItemData = null;
 		Object[] args = { budgetItemId };
-		String sql = "SELECT * FROM OA_BUDGET_ITEMS WHERE budget_item_id = ?";
-		budgetItemData = jdbcTemplate.queryForObject(sql,
-				new BeanPropertyRowMapper<BudgetDetailsOutput>(BudgetDetailsOutput.class), args);
+		String sql = "SELECT BUDGET_ITEM_ID,SERVICE_CODE,SERVICE_NAME_EN,TOTAL_COST,VAT_AMOUNT,TOTAL_BUDGET,CONSUMED_AMOUNT,BALANCE_AMOUNT,IS_EDIT_MODE FROM OA_BUDGET_ITEMS WHERE budget_item_id = ?";
+		//budgetItemData = jdbcTemplate.queryForObject(sql,new BeanPropertyRowMapper<BudgetDetailsOutput>(BudgetDetailsOutput.class), args);//for single
+		budgetItemData = jdbcTemplate.query(sql,BeanPropertyRowMapper.newInstance(BudgetDetailsOutput.class),args);;
 		logger.info("fetched data from oa_budget_items table by using bugetItemId: " + budgetItemData);
 		return budgetItemData;
 	}
@@ -80,8 +80,8 @@ public class BudgetDetailsUpdateDaoImpl implements BudgetDetailsUpdateDao {
 	public void updateBudgetItemTable(BudgetDetailsOutput budgetItem) {
 		logger.info("inside com.mashreq.oa.dao:BudgetDetailsUpdateDaoImpl class having updateBudgetItemTable() method");
 		// Implement logic to update BudgetItem using jdbcTemplate
-		String sql = "UPDATE OA_BUDGET_ITEMS SET consumed_amount = ?, balance_amount = ? WHERE budget_item_id = ?";
-		jdbcTemplate.update(sql, budgetItem.getConsumedAmount(), budgetItem.getBalanceAmount(),budgetItem.getBudgetItemId());
+		String sql = "UPDATE OA_BUDGET_ITEMS SET service_code = ?,consumed_amount = ?, balance_amount = ? WHERE budget_item_id = ?";
+		jdbcTemplate.update(sql, budgetItem.getServiceCode(),budgetItem.getConsumedAmount(), budgetItem.getBalanceAmount(),budgetItem.getBudgetItemId());
 		//return new BudgetDetailsOutput(budgetItem.getConsumedAmount(),budgetItem.getBalanceAmount(),budgetItem.getBudgetItemId());
 	}
 	
@@ -190,6 +190,8 @@ public class BudgetDetailsUpdateDaoImpl implements BudgetDetailsUpdateDao {
 
 		String newUpdatedTo = formatter.format(updatedTo);
 		System.out.println(newUpdatedTo);
+		
+		String updatedBy = userName; 
 
 		try {
 			fetchedListData = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(AuditTrailLog.class),

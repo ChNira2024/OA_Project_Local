@@ -1,7 +1,10 @@
 package com.mashreq.oa.service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,73 +29,72 @@ public class BudgetItemsDetailsUpdateServiceImpl implements BudgetDetailsUpdateS
 	
 
 	@Override
-//	@Transactional
-	public BudgetDetailsOutput updateBudgetItems(Reversal reversal,String username) 
+	@Transactional(rollbackFor = Exception.class)
+	public List<BudgetDetailsOutput> updateBudgetItems(Reversal reversal,String username) 
 	{
-		logger.info("inside com.mashreq.oa.service.BudgetItemsDetailsUpdateServiceImpl class having updateBudgetItems()");
 		
-		BudgetDetailsOutput budgetItemData = null;
-
-		logger.info("BudgetItemsDetailsUpdateServiceImpl class updateBudgetItems()-Reversal Data: " + reversal);
-
-		
-		// Fetch all records from OA_AUDIT_TRAIL based on payment ID
-		List<AuditTrail> auditTrailRecords = dao.getAuditTrailRecords(reversal);
-		logger.info("fetched auditTrailRecords: " + auditTrailRecords);
-		
-		String fromScreen = "Updated From Screen By";
-		String uploadedBy = fromScreen + ": " + username;
-
-		// Iterate over audit trail records
-		 for (AuditTrail auditTrailRecord : auditTrailRecords) 
-		{
-		
-			// Subtract new value from old value to get ConsumedAmount
-			 //Double consumedAmount = Double.parseDouble(auditTrailRecord.getNewValue()) - Double.parseDouble(auditTrailRecord.getOldValue());
-			 
-			 //Subtract new value from old value to get ConsumedAmount(get absolute value)
-			 Double consumedAmount = Math.abs(Double.parseDouble(auditTrailRecord.getNewValue()) - Double.parseDouble(auditTrailRecord.getOldValue()));
+			logger.info("inside com.mashreq.oa.service.BudgetItemsDetailsUpdateServiceImpl class having updateBudgetItems()-Reversal Data: "+reversal);
 			
+			List<BudgetDetailsOutput> budgetItemData = null;
+
+			// Fetch all records from OA_AUDIT_TRAIL based on payment ID
+			List<AuditTrail> auditTrailRecords = dao.getAuditTrailRecords(reversal);
+			logger.info("fetched auditTrailRecords: " + auditTrailRecords);
 			
-			logger.info("Consumed Amount: " +consumedAmount);
-			logger.info("invoice amount: " + reversal.getInvoiceAmount());
+			String uploadedBy = username;
+			Map<String, Double> serviceCodeDifferencesAmount = auditTrailRecords.stream()
+			        .collect(Collectors.groupingBy(AuditTrail::getServiceCode,
+			                Collectors.summingDouble(record -> {
+			                    double oldValue = Double.parseDouble(record.getOldValue());
+			                    double newValue = Double.parseDouble(record.getNewValue());
+			                    return Math.abs(oldValue - newValue);
+			                })));
+	        // Summing up differences amount  from all service codes
+	        Double consumedAmount = serviceCodeDifferencesAmount.values().stream().mapToDouble(Double::doubleValue).sum();
+	        logger.info("consumedAmount:"+consumedAmount);
+	        logger.info("inVoiceAmount:"+reversal.getInvoiceAmount());
 
-			/*
-			  if(consumedAmount.equals(reversal.getInvoiceAmount())) 
-			   {
-			    logger.info(">>>>>>>>>Equal"); 
-			  } 
-			  else 
-			  { logger.info("Not Equal"); 
-			  }
-			  
-			 */
 
-			// Fetch BudgetItem based on budgetItemId
-			budgetItemData = dao.getBudgetItemById(auditTrailRecord.getId());
-			logger.info("fetched data from oa_budget_items table by using budgetItemId: " + budgetItemData);
+	        BudgetDetailsOutput budgetItem = null;
+	        if (consumedAmount.equals(reversal.getInvoiceAmount())) 
+	        {
+	            System.out.println("Invoice amount matches calculated value (consumedAmount).");
 
-			// Add validation
-			if (consumedAmount.equals(reversal.getInvoiceAmount())) 
-			{
-				// Update BudgetItem based on your logic
-				if (budgetItemData != null) 
-				{
-					Double updatedConsumerAmount = budgetItemData.getConsumedAmount() - consumedAmount;
-					Double updatedBalanceAmount = budgetItemData.getBalanceAmount() + consumedAmount;
+	           
+	            
+	            // Iterate over all AuditTrail2 records and update BudgetItem data
+	            for (AuditTrail auditTrailRecord : auditTrailRecords) 
+	            {
+	                budgetItemData = dao.getBudgetItemById(auditTrailRecord.getId());
 
-					budgetItemData.setConsumedAmount(updatedConsumerAmount);
-					budgetItemData.setBalanceAmount(updatedBalanceAmount);
+	                // Assuming there is only one BudgetDetailsOutput object for each AuditTrail2 record
+	                if (!budgetItemData.isEmpty()) 
+	                {
+	                     budgetItem = budgetItemData.get(0);
+	                    
+	                    // Calculate consumedAmount separately for each AuditTrail2 service code 
+	                    Double consumedAmountt = serviceCodeDifferencesAmount.get(auditTrailRecord.getServiceCode());
 
-					// Save the updated BudgetItem
-					dao.updateBudgetItemTable(budgetItemData);
-				}
-				// insert Log into OA_AUDIT_TRAIL_LOG
-				dao.logAuditTrail(budgetItemData, auditTrailRecord, reversal.getInvoiceAmount(),uploadedBy,"Reversal Action Done");
-			}
-			
-		}//for-loop end
-		return budgetItemData;
+	                    Double updatedConsumerAmount = budgetItem.getConsumedAmount() - consumedAmountt;
+	                    Double updatedBalanceAmount = budgetItem.getBalanceAmount() + consumedAmountt;
+
+	                    budgetItem.setConsumedAmount(updatedConsumerAmount);
+	                    budgetItem.setBalanceAmount(updatedBalanceAmount);
+
+	                    // Save the updated BudgetItem data
+	                    dao.updateBudgetItemTable(budgetItem);
+	                    
+	                }
+	            }
+	         // Insert Log into OA_AUDIT_TRAIL_LOG 
+	           AuditTrail auditTrail =  auditTrailRecords.get(0);
+	                dao.logAuditTrail(budgetItem, auditTrail, reversal.getInvoiceAmount(), uploadedBy, "Reversal Action Done");
+	        }
+	        else 
+	        {
+	            System.out.println("Invoice amount does not match calculated value (consumedAmount).");
+	        }						
+			return budgetItemData;
 	}
 	
 	@Override
@@ -100,52 +102,65 @@ public class BudgetItemsDetailsUpdateServiceImpl implements BudgetDetailsUpdateS
 	{
 		logger.info("BudgetItemsDetailsUpdateServiceImpl class having updateServiceCode() method ");
 		
-		BudgetDetailsOutput budgetItemData = null;
+		List<BudgetDetailsOutput> budgetItemData = null;
 		
 		// Fetch all records from OA_AUDIT_TRAIL based on payment ID
 		  List<AuditTrail> auditTrailRecords= dao.getAuditTrailRecords(reversalEdit);
 		  logger.info("fetched auditTrailRecords: " + auditTrailRecords);
 		  
-		  String fromScreen = "Updated From Screen By";
-			String uploadedBy = fromScreen + ": " + username;
+			String uploadedBy = username;
 		  
-		// Iterate over audit trail records
-			 for (AuditTrail auditTrailRecord : auditTrailRecords) 
-			{
-				//Subtract new value from old value to get ConsumedAmount(get absolute value)
-				 Double consumedAmount = Math.abs(Double.parseDouble(auditTrailRecord.getNewValue()) - Double.parseDouble(auditTrailRecord.getOldValue()));
-				logger.info("Consumed Amount: " +consumedAmount);
-				logger.info("invoice amount: " + reversalEdit.getInvoiceAmount());
-				
-				// Fetch BudgetItem based on budgetItemId
-				 budgetItemData = dao.getBudgetItemById(auditTrailRecord.getId());
-				 logger.info("BudgetItemsDetailsUpdateServiceImpl class having updateServiceCode() fetched data from oa_budget_items table by using budgetItemId: " + budgetItemData);
-				 
-				// Add validation
-				if (consumedAmount.equals(reversalEdit.getInvoiceAmount())) 
-				{
+			Map<String, Double> serviceCodeDifferencesAmount = auditTrailRecords.stream()
+			        .collect(Collectors.groupingBy(AuditTrail::getServiceCode,
+			                Collectors.summingDouble(record -> {
+			                    double oldValue = Double.parseDouble(record.getOldValue());
+			                    double newValue = Double.parseDouble(record.getNewValue());
+			                    return Math.abs(oldValue - newValue);
+			                })));
+			
+	        // Summing up differences amount  from all service codes
+	        Double consumedAmount = serviceCodeDifferencesAmount.values().stream().mapToDouble(Double::doubleValue).sum();
+	        logger.info("consumedAmount:"+consumedAmount);
+	        logger.info("inVoiceAmount:"+reversalEdit.getInvoiceAmount());
 
-					// Update BudgetItem based on your logic
-					if (budgetItemData != null) 
-					{
-						Double updatedConsumerAmount = budgetItemData.getConsumedAmount() - consumedAmount;
-						Double updatedBalanceAmount = budgetItemData.getBalanceAmount() + consumedAmount;
 
-						budgetItemData.setConsumedAmount(updatedConsumerAmount);
-						budgetItemData.setBalanceAmount(updatedBalanceAmount);
-						budgetItemData.setServiceCode(reversalEdit.getNewServiceCode());
+	        BudgetDetailsOutput budgetItem = null;
+	        if (consumedAmount.equals(reversalEdit.getInvoiceAmount())) 
+	        {
+	            System.out.println("Invoice amount matches calculated value (consumedAmount).");
 
-						// Save the updated BudgetItem
-						dao.updateBudgetItemTableWithServiceCode(budgetItemData);
-						
-						
-					}
-					// insert Log into OA_AUDIT_TRAIL_LOG
-					dao.logAuditTrail(budgetItemData, auditTrailRecord, reversalEdit.getInvoiceAmount(),uploadedBy,"Reversal Action Done");
-//					dao.logAuditTrailWithServiceCode(budgetItemData, auditTrailRecord, reversalEdit.getInvoiceAmount());
+	            budgetItemData = new ArrayList<>();
+	           
+	            
+	            // Iterate over all AuditTrail2 records and update BudgetItem data
+	            for (AuditTrail auditTrailRecord : auditTrailRecords) 
+	            {
+	                budgetItemData = dao.getBudgetItemById(auditTrailRecord.getId());
+
+	                // Assuming there is only one BudgetDetailsOutput object for each AuditTrail2 record
+	                if (!budgetItemData.isEmpty()) 
+	                {
+	                     budgetItem = budgetItemData.get(0);//budgetItemData.stream().forEach(a->a.getBudgetItemId());
+	                    
+	                    // Calculate consumedAmount separately for each AuditTrail2 service code 
+	                    Double consumedAmountt = serviceCodeDifferencesAmount.get(auditTrailRecord.getServiceCode());
+
+	                    Double updatedConsumerAmount = budgetItem.getConsumedAmount() - consumedAmountt;
+	                    Double updatedBalanceAmount = budgetItem.getBalanceAmount() + consumedAmountt;																					
+	                    
+	                    budgetItem.setConsumedAmount(updatedConsumerAmount);
+	                    budgetItem.setBalanceAmount(updatedBalanceAmount);
+	                    budgetItem.setServiceCode(reversalEdit.getNewServiceCode());
+
+	                    // Save the updated BudgetItem data
+	                    dao.updateBudgetItemTableWithServiceCode(budgetItem);
+	                    
+	                    dao.logAuditTrail(budgetItem, auditTrailRecord, reversalEdit.getInvoiceAmount(),uploadedBy,"Reversal Action Done");
+	                }
+	            }
 				}
-			}
-		 return budgetItemData;
+			
+		 return budgetItem;
 	}
 	
 

@@ -53,6 +53,23 @@ public class AuditTrailLog
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
+	
+	
+	public AuditTrailLog() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	public AuditTrailLog(Integer budgetItemId, String pymtReqId, String serviceCode, String reversalAmount,
+			String updatedBy, Timestamp updatedOn, String comment) {
+		super();
+		this.budgetItemId = budgetItemId;
+		this.pymtReqId = pymtReqId;
+		this.serviceCode = serviceCode;
+		this.reversalAmount = reversalAmount;
+		this.updatedBy = updatedBy;
+		this.updatedOn = updatedOn;
+		this.comment = comment;
+	}
 	@Override
 	public String toString() {
 		return "AuditTrailLog [budgetItemId=" + budgetItemId + ", pymtReqId=" + pymtReqId + ", serviceCode="

@@ -11,9 +11,8 @@ import com.mashreq.oa.model.AuditTrailLog;
 
 public interface BudgetDetailsUpdateService 
 {
-	public BudgetDetailsOutput updateBudgetItems(Reversal reversal,String username);
+	public List<BudgetDetailsOutput> updateBudgetItems(Reversal reversal,String username);
 	
-	//public void updateBudgetItems(int budgetItemId, String serviceCode, Double consumedAmount, Double balanceAmount);
 	
 	List<AuditTrailLog> getDataFromAuditTrailLog(String serviceCode, String userName, Date updatedOn);
 	
@@ -21,9 +20,9 @@ public interface BudgetDetailsUpdateService
 
 	public List<PaymentData> getListData();
 	
-	public List<AuditTrailLog> fetchAuditTrailLogById(String pymtReqId) ;
+	public List<AuditTrailLog> fetchAuditTrailLogById(String pymtReqId) ;//
 	
-	public BudgetDetailsOutput updateServiceCode(Reversal reversalEdit,String username);
+	public BudgetDetailsOutput updateServiceCode(Reversal reversalEdit,String username);//edit or revise
 
 	
 }

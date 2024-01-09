@@ -37,7 +37,7 @@ public class BudgetDetailsUpdateController
 	private BudgetDetailsUpdateService service;
 	
 	@PostMapping("/updateBudgetItems")
-    public ResponseEntity<BudgetDetailsOutput> updateBudgetItems(@RequestBody Reversal reversal,@RequestHeader Map<String,String> headers) 
+    public ResponseEntity<List<BudgetDetailsOutput>> updateBudgetItems(@RequestBody Reversal reversal,@RequestHeader Map<String,String> headers) 
 	{
 		logger.info("BudgetDetailsUpdateController class updateBudgetItems()-Reversal Data: "+reversal);
        
@@ -46,9 +46,9 @@ public class BudgetDetailsUpdateController
         	logger.info("Calling updateBudgetDetails() in BudgetDetailsController");
         	String username=headers.get("username");
         	System.out.println("username:"+username);
-        	BudgetDetailsOutput data = service.updateBudgetItems(reversal,username);
+        	List<BudgetDetailsOutput> data = service.updateBudgetItems(reversal,username);
 
-            if (data != null) 
+            if (data != null && !data.isEmpty()) 
             {
                 return new ResponseEntity<>(data, HttpStatus.OK);
             } 
@@ -72,6 +72,7 @@ public class BudgetDetailsUpdateController
 		logger.info("invoiceAmount:"+reversalEdit.getInvoiceAmount());
 		
 		logger.info("Calling updateServiceCode() in BudgetDetailsUpdateController");
+		
         try 
         {
         	String username=headers.get("username");

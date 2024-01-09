@@ -15,7 +15,7 @@ public interface BudgetDetailsUpdateDao
 	
 	public List<AuditTrail> getAuditTrailRecords(Reversal reversal);
 	
-	public BudgetDetailsOutput getBudgetItemById(int budgetItemId);
+	public List<BudgetDetailsOutput> getBudgetItemById(int budgetItemId);
 	
 	public void updateBudgetItemTable(BudgetDetailsOutput budgetItem);
 	
